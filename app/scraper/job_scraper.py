@@ -3,49 +3,51 @@ from playwright.sync_api import sync_playwright
 
 def scrape_jobs():
 
+    jobs_data = []
+
     with sync_playwright() as p:
 
         browser = p.chromium.launch(
-            headless=False
+            headless=True
         )
 
         page = browser.new_page()
-
-        print("Opening RemoteOK...")
 
         page.goto(
             "https://remoteok.com/remote-java-jobs",
             timeout=60000
         )
 
-        print("Website loaded successfully")
+        jobs = page.locator("tr.job")
 
-        job_titles = page.locator("tr.job h2")
+        count = jobs.count()
 
-        companies = page.locator("h3[itemprop='name']")
+        for i in range(min(count, 5)):
 
-        title_count = job_titles.count()
+            try:
 
-        company_count = companies.count()
+                job = jobs.nth(i)
 
-        print(f"Total Titles Found: {title_count}")
-        print(f"Total Companies Found: {company_count}")
+                title = job.locator("h2").inner_text()
 
-        total = min(title_count, company_count, 5)
+                company = job.locator(
+                    "h3[itemprop='name']"
+                ).inner_text()
 
-        for i in range(total):
+                link = job.locator("a").first.get_attribute("href")
 
-            title = job_titles.nth(i).inner_text()
+                job_info = {
+                    "role": title,
+                    "company": company,
+                    "link": f"https://remoteok.com{link}"
+                }
 
-            company = companies.nth(i).inner_text()
+                jobs_data.append(job_info)
 
-            print("----------------------")
-            print("Role:", title)
-            print("Company:", company)
+            except Exception:
 
-        input("Press Enter to close browser...")
+                continue
 
         browser.close()
 
-
-scrape_jobs()
+    return jobs_data
