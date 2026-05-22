@@ -1,5 +1,5 @@
 from playwright.sync_api import sync_playwright
-
+from app.matcher.job_filter import is_java_job
 
 def scrape_jobs():
 
@@ -36,13 +36,15 @@ def scrape_jobs():
 
                 link = job.locator("a").first.get_attribute("href")
 
-                job_info = {
-                    "role": title,
-                    "company": company,
-                    "link": f"https://remoteok.com{link}"
-                }
+                if is_java_job(title):
 
-                jobs_data.append(job_info)
+                    job_info = {
+                        "role": title,
+                        "company": company,
+                        "link": f"https://remoteok.com{link}"
+                    }
+
+                    jobs_data.append(job_info)
 
             except Exception:
 
