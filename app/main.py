@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from app.scraper.job_scraper import scrape_jobs
+from app.database import db
 
 app = FastAPI()
 
