@@ -16,13 +16,13 @@ def scrape_jobs():
 
         
         page.goto(
+            
             "https://remoteok.com/remote-java-jobs",
             timeout=60000,
             wait_until="domcontentloaded"
         )
-
-        jobs = page.locator("tr.job")
-
+        page.wait_for_timeout(5000)
+        jobs = page.locator("tr.job[data-id]")
         count = jobs.count()
 
         for i in range(min(count, 5)):
@@ -31,12 +31,13 @@ def scrape_jobs():
 
                 job = jobs.nth(i)
 
-                title = job.locator("h2").inner_text()
-
+                title = job.locator("h2").text_content()
+                title = title.strip()
+               
                 company = job.locator(
                     "h3[itemprop='name']"
                 ).inner_text()
-
+                company = company.strip()
                 link = job.locator("a").first.get_attribute("href")
 
                 # if is_java_job(title):
