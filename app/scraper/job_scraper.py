@@ -1,6 +1,10 @@
 from playwright.sync_api import sync_playwright
 from app.matcher.job_filter import is_java_job
 from app.database.crud import save_job
+from app.matcher.job_filter import (
+        is_java_job,
+        calculate_job_score
+    )
 
 def scrape_jobs():
 
@@ -24,6 +28,7 @@ def scrape_jobs():
         page.wait_for_timeout(5000)
         jobs = page.locator("tr.job[data-id]")
         count = jobs.count()
+        
 
         for i in range(min(count, 5)):
 
@@ -40,15 +45,6 @@ def scrape_jobs():
                 company = company.strip()
                 link = job.locator("a").first.get_attribute("href")
 
-                # if is_java_job(title):
-
-                #     job_info = {
-                #         "role": title,
-                #         "company": company,
-                #         "link": f"https://remoteok.com{link}"
-                #     }
-                #     save_job(job_info)
-                #     jobs_data.append(job_info)
                 print("Checking title:", title)
 
                 if is_java_job(title):
@@ -58,7 +54,8 @@ def scrape_jobs():
                     job_info = {
                         "role": title,
                         "company": company,
-                        "link": f"https://remoteok.com{link}"
+                        "link": f"https://remoteok.com{link}",
+                        "score": calculate_job_score(title)
                     }
 
                     save_job(job_info)
